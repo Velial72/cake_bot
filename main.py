@@ -9,6 +9,8 @@ from telebot import types
 
 bot = telebot.TeleBot('6125022357:AAHc-FiPd5qsIyHhKaAiTKIft-1h1Jq34HU')
 
+cakes = [['торт 1', 1000], ['торт 4',3000], ['торт 3',3000]]
+
 @bot.message_handler(commands=['start'])
 def start(message):
     start_text = "Привет! Прежде чем оформить заказ, давайте Вы разрешите нам пользоваться данными которые нам необходимо будет получить от Вас? \n \n Нажимая на кнопку продолжить - вы подтверждаете что ознакомились с нашими условиями и приняли их."
@@ -19,10 +21,10 @@ def start(message):
 
 @bot.message_handler(commands=['admin'])
 def admin(message):
-    if message.from_user.username == 'AbRamS0404':
+    if message.from_user.username == 'Only1_MMA':
         start_text = "Здравствуй хозяин, что изволишь?"
         markup = types.InlineKeyboardMarkup()
-        markup.row_width = 2
+        markup.row_width = 1
         button1 = types.InlineKeyboardButton("Количество пользователей", callback_data="members")
         button2 = types.InlineKeyboardButton("Заказы", callback_data="orders")
         markup.add(button1, button2)
@@ -33,9 +35,32 @@ def admin(message):
         bot.send_message(message.chat.id, start_text)
 
 
-@bot.callback_query_handler(func=lambda call:True)
+@bot.callback_query_handler(func=lambda call: True)
 def callback(call):
-    if call.data == 'main_page':
+    if call.data == 'members':
+        # func
+        markup = types.InlineKeyboardMarkup()
+        markup.row_width = 1
+        orders = types.InlineKeyboardButton("Заказы", callback_data="orders")
+        markup.add(orders)
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id,
+                              text=f"Всего зарегистрированных пользователей: ?", reply_markup=markup)
+
+    elif call.data == 'orders':
+        markup = types.InlineKeyboardMarkup()
+        markup2 = types.InlineKeyboardMarkup()
+        markup.row_width = 1
+        members = types.InlineKeyboardButton("Количество пользователей", callback_data="members")
+        done = types.InlineKeyboardButton("Выполнен", callback_data="done")
+        markup.add(done)
+        markup2.add(members)
+        num = 0
+        for name, price in cakes:
+            num += 1
+            bot.send_message(call.message.chat.id, text=f"Заказ №{num}:\n{name}\nцена {price}", reply_markup=markup)
+        bot.send_message(call.message.chat.id, text='поработаем еще?', reply_markup=markup2)
+
+    elif call.data == 'main_page':
         text = "Что ты хочешь?"
         markup = types.InlineKeyboardMarkup()
         markup.row_width = 1
